@@ -1,6 +1,7 @@
 const { DatabaseSync } = require('node:sqlite');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const seeds = require('./seeds');
 
 const DB_PATH = path.join(__dirname, 'data', 'spinner.db');
 const db = new DatabaseSync(DB_PATH);
@@ -44,25 +45,17 @@ function seed() {
 
   const wheelCount = db.prepare('SELECT COUNT(*) as c FROM wheels').get().c;
   if (wheelCount === 0) {
-    const insertWheel = db.prepare('INSERT INTO wheels (name, emoji, sort_order) VALUES (?, ?, ?)');
+    const insertWheel  = db.prepare('INSERT INTO wheels (name, emoji, sort_order) VALUES (?, ?, ?)');
     const insertOption = db.prepare('INSERT INTO options (wheel_id, text, added_by) VALUES (?, ?, ?)');
 
-    const food = insertWheel.run('Food', '🍕', 1).lastInsertRowid;
-    for (const item of ['Pizza', 'Sushi', 'Tacos', 'Burgers', 'Thai', 'Italian', 'Mexican', 'Indian', 'Ramen', 'BBQ']) {
-      insertOption.run(food, item, 'system');
-    }
+    seeds.forEach((wheel, i) => {
+      const { lastInsertRowid } = insertWheel.run(wheel.name, wheel.emoji, i + 1);
+      for (const text of wheel.options) {
+        insertOption.run(lastInsertRowid, text, 'system');
+      }
+    });
 
-    const activity = insertWheel.run('Activity', '🎲', 2).lastInsertRowid;
-    for (const item of ['Movie night', 'Board game', 'Cook together', 'Walk outside', 'Bowling', 'Mini golf', 'Stay in & chill', 'Try a new recipe', 'Game night', 'Karaoke']) {
-      insertOption.run(activity, item, 'system');
-    }
-
-    const intimacy = insertWheel.run('Intimacy', '💕', 3).lastInsertRowid;
-    for (const item of ['Slow dance', 'Give massages', 'Watch a sunset', 'Write each other notes', 'Pick a new show together', 'Stargazing', 'Cook a fancy dinner', 'Photo walk']) {
-      insertOption.run(intimacy, item, 'system');
-    }
-
-    console.log('  Seeded 3 wheels with default options');
+    console.log(`  Seeded ${seeds.length} wheels with default options`);
   }
 }
 
