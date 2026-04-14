@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings — Couple Spinner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <a class="brand" href="/index.html" style="-webkit-text-fill-color:unset;text-decoration:none;">🎰 Couple Spinner</a>
+    <div class="user-info">
+      <span id="username-display"></span>
+      <button class="btn btn-ghost" id="logout-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main style="max-width:480px;margin:2rem auto;padding:0 1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <a href="/index.html" class="btn btn-ghost" style="padding:.35rem .7rem;font-size:.85rem;">← Back</a>
+      <h1 style="font-size:1.3rem;font-weight:700;">Account Settings</h1>
+    </div>
+
+    <!-- Change Username -->
+    <div class="machine" style="padding:1.5rem;">
+      <h2 style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:1rem;">Change Username</h2>
+      <form id="username-form">
+        <div class="form-group">
+          <label>New Username</label>
+          <input type="text" name="newUsername" autocomplete="off" required>
+        </div>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" name="currentPassword" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Username</button>
+        <div class="error-msg" id="username-msg"></div>
+      </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="machine" style="padding:1.5rem;">
+      <h2 style="font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:1rem;">Change Password</h2>
+      <form id="password-form">
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" name="currentPassword" required>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" name="newPassword" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" name="confirmPassword" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Password</button>
+        <div class="error-msg" id="password-msg"></div>
+      </form>
+    </div>
+
+  </main>
+
+  <script>
+    // Auth guard
+    fetch('/api/me').then(r => {
+      if (!r.ok) { window.location.href = '/login.html'; return; }
+      return r.json();
+    }).then(data => {
+      if (data) document.getElementById('username-display').textContent = data.username;
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+
+    document.getElementById('username-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('username-msg');
+      msg.textContent = '';
+      const { newUsername, currentPassword } = e.target.elements;
+
+      const res = await fetch('/api/me/username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newUsername: newUsername.value, currentPassword: currentPassword.value }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById('username-display').textContent = data.username;
+        e.target.reset();
+        msg.style.color = 'var(--accent)';
+        msg.textContent = 'Username updated!';
+      } else {
+        msg.style.color = 'var(--danger)';
+        msg.textContent = data.error;
+      }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('password-msg');
+      msg.textContent = '';
+      const { currentPassword, newPassword, confirmPassword } = e.target.elements;
+
+      if (newPassword.value !== confirmPassword.value) {
+        msg.style.color = 'var(--danger)';
+        msg.textContent = 'New passwords do not match';
+        return;
+      }
+
+      const res = await fetch('/api/me/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: currentPassword.value, newPassword: newPassword.value }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        e.target.reset();
+        msg.style.color = 'var(--accent)';
+        msg.textContent = 'Password updated!';
+      } else {
+        msg.style.color = 'var(--danger)';
+        msg.textContent = data.error;
+      }
+    });
+  </script>
+</body>
+</html>

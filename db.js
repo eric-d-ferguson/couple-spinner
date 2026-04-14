@@ -85,4 +85,16 @@ module.exports = {
   getOption(optionId) {
     return db.prepare('SELECT * FROM options WHERE id = ?').get(optionId);
   },
+
+  getUserById(id) {
+    return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+  },
+
+  updateUsername(id, newUsername) {
+    db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, id);
+  },
+
+  updatePassword(id, newHash) {
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newHash, id);
+  },
 };

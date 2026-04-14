@@ -48,6 +48,44 @@ app.get('/api/me', (req, res) => {
   res.json({ username: req.session.user.username });
 });
 
+// --- Account routes ---
+
+app.post('/api/me/username', requireAuth, (req, res) => {
+  const { currentPassword, newUsername } = req.body;
+  const newUser = (newUsername || '').trim().toLowerCase();
+  if (!newUser) return res.status(400).json({ error: 'New username is required' });
+  if (newUser.length < 2) return res.status(400).json({ error: 'Username must be at least 2 characters' });
+
+  const user = db.getUserById(req.session.user.id);
+  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+
+  const existing = db.getUserByUsername(newUser);
+  if (existing && existing.id !== user.id) {
+    return res.status(409).json({ error: 'Username already taken' });
+  }
+
+  db.updateUsername(user.id, newUser);
+  req.session.user.username = newUser;
+  res.json({ username: newUser });
+});
+
+app.post('/api/me/password', requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'New password must be at least 4 characters' });
+  }
+
+  const user = db.getUserById(req.session.user.id);
+  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+
+  db.updatePassword(user.id, bcrypt.hashSync(newPassword, 10));
+  res.json({ ok: true });
+});
+
 // --- Wheels & options routes ---
 
 app.get('/api/wheels', requireAuth, (req, res) => {
