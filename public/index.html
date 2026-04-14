@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Couple Spinner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <span class="brand">🎰 Couple Spinner</span>
+    <div class="user-info">
+      <span id="username-display"></span>
+      <button class="btn btn-ghost" id="logout-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="machine-wrap">
+    <!-- Machine body -->
+    <div class="machine">
+      <div class="reels-row" id="reels-row">
+        <!-- Reel columns injected by app.js -->
+      </div>
+      <div class="machine-footer">
+        <button class="btn-spin-all" id="spin-all-btn">🎰 Spin All</button>
+      </div>
+    </div>
+
+    <!-- Results strip -->
+    <div class="results-strip" id="results-strip" aria-live="polite"></div>
+
+    <!-- Edit panels (one per wheel, below the machine) -->
+    <div class="edit-panels-row" id="edit-panels-row"></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
