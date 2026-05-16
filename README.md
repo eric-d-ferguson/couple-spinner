@@ -2,9 +2,13 @@
 
 A local-network slot machine decision maker for couples. Spin configurable reels to decide what to eat, what to do, and more — together.
 
+## Origin Story
+
+This started as my partner's idea — she wanted something fun to help us stop agonizing over "what do you want to do tonight?" We built the whole thing in a single evening: one bottle of cheap cab and two episodes of Ozark. It was a good excuse to show her how easy it was to build something quickly with [Claude Code](https://claude.ai/code).
+
 ## Features
 
-- Three slot machine reels: **Food**, **Activity**, and **Intimacy**
+- Two slot machine reels: **Food** and **Activity**
 - Spin reels individually or all at once with a staggered cascade
 - Both partners log in and share the same wheels in real time
 - Add or remove options on any reel at any time
